@@ -13,7 +13,7 @@ const upload = async () => {
     const filePath = path.resolve(args[0]);
     try {
         console.log(`Parsing file: ${filePath}...`);
-        const text = await extractText(filePath);
+        const text = await extractText(filePath, filePath);
         
         console.log('Saving to database...');
         await saveKnowledge(text, { filename: path.basename(filePath) });

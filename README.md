@@ -44,6 +44,7 @@ A production-ready WhatsApp AI bot designed for sales closing, lead prioritizati
 
 ## 🌐 Dashboards & URLs
 - **Admin Dashboard:** `http://localhost:3000/admin` (Upload manuals, add products)
+- **Revenue Reports:** `http://localhost:3000/reports` (Track daily/monthly income)
 - **Live Logs:** `http://localhost:3000/logs` (Monitor real-time AI actions)
 
 For a detailed walkthrough, see [MANUAL.md](MANUAL.md).

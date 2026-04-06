@@ -51,9 +51,29 @@ const initDB = async () => {
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255),
         description TEXT,
-        price VARCHAR(100),
+        price DECIMAL(10, 2),
+        cost_price DECIMAL(10, 2),
+        min_selling_price DECIMAL(10, 2),
+        promo_active BOOLEAN DEFAULT FALSE,
+        promo_price DECIMAL(10, 2),
+        stock_quantity INT DEFAULT 10,
+        features TEXT,
         image_url TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS payments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        customer_id INT,
+        reference VARCHAR(100) UNIQUE,
+        amount DECIMAL(10, 2),
+        status VARCHAR(50) DEFAULT 'pending',
+        metadata JSON,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        paid_at DATETIME,
+        FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
       )
     `);
     console.log('MySQL Database tables initialized');
@@ -115,18 +135,60 @@ const getAllKnowledge = async () => {
   return rows.map(r => r.content).join('\n\n');
 };
 
-const addProduct = async (name, description, price, imageUrl) => {
-  await pool.query('INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl]);
+const addProduct = async (productData) => {
+  const { name, description, price, costPrice, minSellingPrice, promoActive, promoPrice, imageUrl, stockQuantity, features } = productData;
+  await pool.query(
+    'INSERT INTO products (name, description, price, cost_price, min_selling_price, promo_active, promo_price, image_url, stock_quantity, features) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+    [name, description, price, costPrice, minSellingPrice, promoActive, promoPrice, imageUrl, stockQuantity, features]
+  );
+};
+
+const updateStock = async (productId, difference) => {
+    await pool.query('UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?', [difference, productId]);
 };
 
 const getProducts = async () => {
-  const [rows] = await pool.query('SELECT * FROM products');
-  return rows;
+    const [rows] = await pool.query('SELECT * FROM products');
+    return rows;
 };
 
 const getProductById = async (id) => {
   const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
   return rows.length > 0 ? rows[0] : null;
+};
+
+const getAllCustomers = async () => {
+    const [rows] = await pool.query('SELECT * FROM customers ORDER BY last_interaction DESC');
+    return rows;
+};
+
+const recordPaymentInitiation = async (customerId, reference, amount, metadata = {}) => {
+    await pool.query(
+        'INSERT INTO payments (customer_id, reference, amount, metadata) VALUES (?, ?, ?, ?)',
+        [customerId, reference, amount, JSON.stringify(metadata)]
+    );
+};
+
+const updatePaymentStatus = async (reference, status) => {
+    const paidAt = status === 'success' ? new Date() : null;
+    await pool.query(
+        'UPDATE payments SET status = ?, paid_at = COALESCE(?, paid_at) WHERE reference = ?',
+        [status, paidAt, reference]
+    );
+};
+
+const getRevenueReports = async () => {
+    const [daily] = await pool.query(`
+        SELECT DATE(paid_at) as date, SUM(amount) as total 
+        FROM payments WHERE status = 'success' 
+        GROUP BY DATE(paid_at) ORDER BY date DESC LIMIT 30
+    `);
+    const [monthly] = await pool.query(`
+        SELECT DATE_FORMAT(paid_at, '%Y-%m') as month, SUM(amount) as total 
+        FROM payments WHERE status = 'success' 
+        GROUP BY month ORDER BY month DESC
+    `);
+    return { daily, monthly };
 };
 
 module.exports = {
@@ -140,5 +202,9 @@ module.exports = {
   getAllKnowledge,
   addProduct,
   getProducts,
-  getProductById
+  getProductById,
+  getAllCustomers,
+  recordPaymentInitiation,
+  updatePaymentStatus,
+  getRevenueReports
 };

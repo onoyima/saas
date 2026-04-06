@@ -3,8 +3,8 @@ const mammoth = require('mammoth');
 const fs = require('fs');
 const path = require('path');
 
-const extractText = async (filePath) => {
-    const ext = path.extname(filePath).toLowerCase();
+const extractText = async (filePath, originalName = '') => {
+    const ext = (path.extname(originalName) || path.extname(filePath)).toLowerCase();
     const dataBuffer = fs.readFileSync(filePath);
 
     if (ext === '.pdf') {
