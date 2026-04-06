@@ -9,3 +9,7 @@ discoverModels.js
 testGeminiModels.js
 testWebhook.js
 database.sqlite
+credentials.txt
+sample_manual.md
+MANUAL.md
+uploads/

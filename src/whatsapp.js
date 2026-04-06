@@ -50,7 +50,37 @@ const markMessageAsRead = async (messageId) => {
   }
 };
 
+const sendWhatsAppImage = async (to, imageUrl, caption = '') => {
+  logger.sendEvent('Sending WhatsApp Image', { to, imageUrl, caption }, 'info');
+  try {
+    const response = await axios({
+      method: 'POST',
+      url: `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`,
+      headers: {
+        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      data: {
+        messaging_product: 'whatsapp',
+        to: to,
+        type: 'image',
+        image: {
+          link: imageUrl,
+          caption: caption
+        },
+      },
+    });
+    logger.sendEvent('WhatsApp Image Sent', response.data, 'success');
+    return response.data;
+  } catch (error) {
+    logger.sendEvent('WhatsApp Image Send Failed', error.response?.data || error.message, 'error');
+    console.error('Error sending WhatsApp image:', error.response?.data || error.message);
+    return null;
+  }
+};
+
 module.exports = {
   sendWhatsAppMessage,
+  sendWhatsAppImage,
   markMessageAsRead,
 };

@@ -3,11 +3,12 @@
 A production-ready WhatsApp AI bot designed for sales closing, lead prioritization, and customer follow-ups. Powered by **Google Gemini AI** and **Node.js**.
 
 ## 🚀 Features
-- **AI Sales Closer:** Uses a high-performance system prompt to qualify leads and guide customers to purchase.
-- **Buyer Intelligence:** Automatically classifies customers by intent level (LOW, MEDIUM, HIGH) in the database.
-- **Auto-Follow-up:** Maintains full conversation history to provide contextual responses.
-- **Live Monitoring:** Includes a real-time log dashboard at `/logs` to watch messages and AI reasoning live.
-- **MySQL Persistence:** Robust data storage for professional business scaling.
+- **AI Sales Closer:** Advanced conversion logic to prioritize high-intent buyers.
+- **Knowledge Hub (`/admin`):** Upload PDFs/DOCX manuals to train the AI on your specific business rules.
+- **Product Marketing:** AI automatically sends product images on WhatsApp from your catalog.
+- **Buyer Intelligence:** Automatically classifies customers by intent level in MySQL.
+- **Live Monitoring (`/logs`):** Watch incoming webhooks and AI reasoning in real-time.
+- **Admin Dashboard (`/admin`):** Manage your business knowledge and product inventory via a premium web UI.
 
 ## 🛠️ Prerequisites
 - [XAMPP](https://www.apachefriends.org/) (for MySQL)
@@ -41,12 +42,17 @@ A production-ready WhatsApp AI bot designed for sales closing, lead prioritizati
    npm start
    ```
 
-## 🌐 Local Webhook Testing
+## 🌐 Dashboards & URLs
+- **Admin Dashboard:** `http://localhost:3000/admin` (Upload manuals, add products)
+- **Live Logs:** `http://localhost:3000/logs` (Monitor real-time AI actions)
+
+For a detailed walkthrough, see [MANUAL.md](MANUAL.md).
+
+## Local Webhook Testing
 1. Start the server: `npm start`
 2. Start Ngrok: `ngrok http 3000`
-3. Update your Meta Webhook URL to: `https://your-ngrok-url.ngrok-free.app/webhook`
-4. Use `dummy_verify` as the Verification Token.
-5. Watch live traffic at: `http://localhost:3000/logs`
+3. Update your Meta Webhook URL in Developer Dashboard.
+4. Watch live traffic at the URLs above.
 
 ## 📄 License
 MIT

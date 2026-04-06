@@ -36,6 +36,26 @@ const initDB = async () => {
         FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
       )
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS knowledge (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        content TEXT,
+        metadata JSON,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS products (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255),
+        description TEXT,
+        price VARCHAR(100),
+        image_url TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     console.log('MySQL Database tables initialized');
   } catch (err) {
     console.error('MySQL Init Error:', err.message);
@@ -86,6 +106,29 @@ const getRecentConversation = async (customerId, limit = 10) => {
   return rows.reverse();
 };
 
+const saveKnowledge = async (content, metadata = {}) => {
+  await pool.query('INSERT INTO knowledge (content, metadata) VALUES (?, ?)', [content, JSON.stringify(metadata)]);
+};
+
+const getAllKnowledge = async () => {
+  const [rows] = await pool.query('SELECT content FROM knowledge');
+  return rows.map(r => r.content).join('\n\n');
+};
+
+const addProduct = async (name, description, price, imageUrl) => {
+  await pool.query('INSERT INTO products (name, description, price, image_url) VALUES (?, ?, ?, ?)', [name, description, price, imageUrl]);
+};
+
+const getProducts = async () => {
+  const [rows] = await pool.query('SELECT * FROM products');
+  return rows;
+};
+
+const getProductById = async (id) => {
+  const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
+  return rows.length > 0 ? rows[0] : null;
+};
+
 module.exports = {
   pool,
   getCustomer,
@@ -93,4 +136,9 @@ module.exports = {
   updateCustomerProfile,
   saveMessage,
   getRecentConversation,
+  saveKnowledge,
+  getAllKnowledge,
+  addProduct,
+  getProducts,
+  getProductById
 };

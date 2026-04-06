@@ -69,12 +69,19 @@ Always respond with a JSON object in this format (and nothing else):
     "urgency_level": "LOW, MEDIUM, HIGH",
     "intent_level": "LOW_INTENT, MEDIUM_INTENT, HIGH_INTENT"
   },
+  "send_product_id": "Number ID of product to showcase or null",
   "messageToUser": "The conversational text to send to the WhatsApp user"
-}`
+}
+
+BUSINESS CONTEXT (STRICTLY ADHERE TO THIS):
+\${businessManual || 'No manual uploaded yet.'}
+
+AVAILABLE PRODUCTS (MARKET THESE):
+\${productList || 'No products in catalog yet.'}`
     });
 }
 
-const processIncomingMessage = async (customerProfile, conversationHistory, incomingMessage) => {
+const processIncomingMessage = async (customerProfile, conversationHistory, incomingMessage, businessManual = '', productList = '') => {
   if (!model) {
       console.error("GEMINI_API_KEY is not configured.");
       return {
